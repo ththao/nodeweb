@@ -1,0 +1,230 @@
+1. Express.js
+Express là 1 framework nodejs để tạo web application, bao gồm nhiều tính năng mạnh mẽ để xây dựng các ứng dụng web và mobile. 
+Việc cài đặt và xây dựng web application bằng express khá đơn giản, nhanh chóng, đòi hỏi ít kỹ năng vì chỉ sử dụng javascript.
+
+2. Cài đặt
+Ta có thể khởi tạo 1 web application sử dụng express với các lệnh sau:
+Khởi tạo thư mục làm việc:
+$ mkdir myapp
+$ cd myapp
+
+Sử dụng npm init để tạo package.json
+$ npm init 
+
+cài đặt express
+$ npm install express --save
+nếu phát triển với vagrant trên windows thì
+$ npm install express --save --no-bin-links
+
+tạo file app.js trong thư mục làm việc để bắt đầu với trang đầu tiên
+
+const express = require('express');
+const app = express();
+const port = 3000;
+
+app.get('/', (req, res) => {
+	res.send('Hello World!');
+});
+
+app.listen(port, () => {
+	console.log(`Example app listening at http://localhost:${port}`);
+});
+
+tại thời điểm này, ta đã có thể chạy được trang web với nodejs và express
+$ node app.js
+
+Then, load http://localhost:3000/ in a browser to see the output.
+
+
+3. Express Generator
+//Step 1:
+Ta có thể sử dụng application generator tool để xây dựng khung sườn cho ứng dụng nhanh chóng:
+npx express-generator
+express --view=pug myapp
+cd myapp
+
+// Is this Vagrant on top of Windows? You cannot use symlinks then. Try using the --no-bin-links flag.
+npm install express --save --no-bin-links
+npm install body-parser --save --no-bin-links
+npm install cookie-parser --save --no-bin-links
+
+
+Routing
+quyết định ứng dụng sẽ đáp ứng các request từ phía client như thế nào, nó là 1 URI (hoặc đường dẫn) và method (POST, GET, PUT, ...)
+mỗi route có thể có 1 hoặc nhiều functions, các function này sẽ được thực thi khi route khớp.
+Định nghĩa 1 route như sau:
+app.METHOD(PATH, HANDLER)
+
+app là 1 thực thể của express.
+METHOD là 1 HTTP request method, viết thường.
+
+app.get('/user/create', function (req, res) {
+	res.send('Got a GET request at /user/create')
+});
+
+app.post('/user/create', function (req, res) {
+	res.send('Got a POST request at /user/create')
+});
+
+
+Route Path là đường dẫn.
+
+Route Parameters
+Định nghĩa parameter trong route path như sau:
+app.get('/users/:userId/books/:bookId', function (req, res) {
+	res.send(req.params)
+});
+
+Ví dụ:
+Route path: /users/:userId/books/:bookId
+Request URL: http://localhost:3000/users/34/books/8989
+req.params: { "userId": "34", "bookId": "8989" }
+
+Route path: /flights/:from-:to
+Request URL: http://localhost:3000/flights/LAX-SFO
+req.params: { "from": "LAX", "to": "SFO" }
+
+Route path: /user/:userId(\d+)
+Request URL: http://localhost:3000/user/42
+req.params: {"userId": "42"}
+
+HANDLER là function được thực thi khi route khớp.
+
+Route handlers là 1 function:
+app.get('/example/a', function (req, res) {
+	res.send('Hello from A!')
+});
+
+Route handlers là nhiều function
+app.get('/example/b', function (req, res, next) {
+	console.log('the response will be sent by the next function ...');
+	next();
+}, function (req, res) {
+	res.send('Hello from B!');
+});
+
+Route handlers là 1 array các function
+var cb0 = function (req, res, next) {
+  console.log('CB0')
+  next()
+}
+var cb1 = function (req, res, next) {
+  console.log('CB1')
+  next()
+}
+var cb2 = function (req, res) {
+  res.send('Hello from C!')
+}
+app.get('/example/c', [cb0, cb1, cb2])
+
+
+Route handlers hỗn hợp
+var cb0 = function (req, res, next) {
+  console.log('CB0')
+  next()
+}
+
+var cb1 = function (req, res, next) {
+  console.log('CB1')
+  next()
+}
+
+app.get('/example/d', [cb0, cb1], function (req, res, next) {
+  console.log('the response will be sent by the next function ...')
+  next()
+}, function (req, res) {
+  res.send('Hello from D!')
+});
+
+
+trong 1 số trường hợp, ta cần sử dụng nhiều method cho cùng 1 path, có thể sử dụng app.route()
+app.route('/book')
+  .get(function (req, res) {
+    res.send('Get a random book')
+  })
+  .post(function (req, res) {
+    res.send('Add a book')
+  })
+  .put(function (req, res) {
+    res.send('Update the book')
+  })
+  
+  
+express.Router
+class express.Router được sử dụng để tạo ra các module, sau đó sử dụng trong file app.js
+tạo 1 file user.js trong thư mục routes như sau:
+
+sử dụng user.js trong app.js:
+var usersRouter = require('./routes/user');
+app.use('/user', usersRouter);
+
+lúc này ta có thể truy xuất các routes trong user.js bằng cách thêm /user vào trước các route path, ví dụ /user/profile/:id
+
+
+Middleware
+Function Middleware là các function có thể truy xuất object request (req), object response (res), và function middleware kế tiếp trong chu kỳ request-response của ứng dụng. Function middleware được dùng chung bằng 1 biến next.
+Các function Middleware có thể:
+Thực thi code bất kỳ.
+Thay đổi các object request response.
+kết thúc chu kỳ request-response.
+gọi function middleware kế tiếp.
+
+
+Application-level middleware
+Function sau được thực thi cho bất kỳ request nào:
+app.use(function (req, res, next) {
+  console.log('Time:', Date.now())
+  next()
+});
+
+Router-level middleware
+trở lại file routes/user.js ở trên, chúng ta thêm vào function sau (được thực thi cho tất cả các request tới module user):
+router.use(function (req, res, next) {
+  console.log('Time:', Date.now())
+  next()
+})
+
+Error-handling middleware
+bắt buộc phải có 4 parameter
+app.use(function (err, req, res, next) {
+  console.error(err.stack)
+  res.status(500).send('Something broke!')
+})
+
+Third-party middleware
+Ví dụ sau đây mình họa việc cài đặt và sử dụng middleware cookie-parsing:
+var cookieParser = require('cookie-parser')
+
+// load the cookie-parsing middleware
+app.use(cookieParser())
+
+Template Engine
+npm install pug --save --no-bin-links
+
+app.set('view engine', 'pug')
+
+tạo file index.pug và render:
+app.get('/', function (req, res) {
+  res.render('index', { title: 'Hey', message: 'Hello there!' })
+});
+
+Kết nối MySQL:
+npm install mysql --save --no-bin-links
+
+var mysql = require('mysql')
+var connection = mysql.createConnection({
+  host: 'localhost',
+  user: 'dbuser',
+  password: 's3kreee7',
+  database: 'my_db'
+})
+
+connection.connect()
+
+connection.query('SELECT 1 + 1 AS solution', function (err, rows, fields) {
+  if (err) throw err
+
+  console.log('The solution is: ', rows[0].solution)
+})
+
+connection.end()

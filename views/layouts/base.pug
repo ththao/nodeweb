@@ -1,0 +1,18 @@
+doctype html
+html
+	head
+		title #{title}
+		link(rel='stylesheet', href='https://www.w3schools.com/w3css/4/w3.css')
+		link(rel='stylesheet', href='/css/style.css')
+		meta(name="viewport" content="width=device-width, initial-scale=1")
+body
+	main
+		block header
+			header.header
+				h1 #{title}	
+		div(class="w3-sidebar w3-bar-block" style="width:20%")
+			a(href='/' class="w3-bar-item w3-button sidebar-home") Home
+			a(href='/user' class="w3-bar-item w3-button sidebar-user") Users
+			a(href='/department' class="w3-bar-item w3-button sidebar-department") Departments
+		div(class="" style="margin-left:20%")
+			block content

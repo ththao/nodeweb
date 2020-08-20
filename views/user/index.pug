@@ -1,0 +1,12 @@
+extends ../layouts/base
+block content
+	div.container
+		a(href='/user/create' class="create-user") Create New User
+		table(class="user-list")
+			for user in users
+				tr
+					td=user.id
+					td
+						a(href='/user/profile/'+user.id class="user-link") #{user.name}
+					td= user.address
+					td= user.phone

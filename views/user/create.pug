@@ -1,0 +1,9 @@
+extends ../layouts/base
+block content
+	div.container
+		form(action="/user/create" method="POST")
+			p First Name:
+				input(type="text" name="first_name" placeholder="First Name" value=first_name)
+			p Last Name:
+				input(type="text" name="last_name" placeholder="Last Name" value=last_name)
+			input(type="submit" value="Submit")
